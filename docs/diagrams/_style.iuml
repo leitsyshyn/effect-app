@@ -1,0 +1,16 @@
+skinparam style strictuml
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam roundCorner 8
+skinparam ArrowColor #333333
+skinparam BorderColor #333333
+skinparam BackgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF8DC
+skinparam noteBorderColor #B8A26A
+skinparam classAttributeIconSize 0
+skinparam sequenceMessageAlign left
+skinparam sequenceLifeLineBorderColor #888888
+hide empty members
+hide empty description

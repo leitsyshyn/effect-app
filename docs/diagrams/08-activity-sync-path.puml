@@ -1,0 +1,43 @@
+@startuml activity-sync-path
+!include _style.iuml
+title Activity Diagram — Path Synchronization
+
+start
+:Detect local or remote change;
+:Enqueue path;
+while (Local, remote and synced\nstates differ?) is ([yes])
+  if (Linked folder available?) then ([no])
+    :Keep path queued;
+    stop
+  else ([yes])
+  endif
+  if (Clean move detected?) then ([yes])
+    if (Moved on the server?) then ([yes])
+      :Rename local item;
+    else ([no])
+      :Move node on the server;
+    endif
+    :Re-key synced subtree;
+  else ([no])
+  switch (Required action)
+  case ([upload])
+    :Upload local file;
+  case ([download])
+    :Download to temporary file;
+    :Verify checksum;
+    :Move file into place;
+  case (<U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0>[delete])
+    :Delete counterpart;
+  case ([create folder])
+    :Create missing folder;
+  case ([conflict])
+    :Rename local copy;
+    :Record conflict;
+    :Enqueue renamed copy;
+  endswitch
+  :Update synced state;
+  endif
+endwhile ([no])
+:Dequeue path;
+stop
+@enduml

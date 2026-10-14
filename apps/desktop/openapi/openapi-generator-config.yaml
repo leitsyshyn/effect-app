@@ -1,0 +1,34 @@
+generate:
+  - types
+  - client
+accessModifier: public
+namingStrategy: idiomatic
+nameOverrides:
+  user.me: me
+  drive.listFolder: listFolder
+  drive.getNode: getNode
+  drive.updateNode: updateNode
+  drive.deleteNode: deleteNode
+  drive.createFolder: createFolder
+  drive.uploadFile: uploadFile
+  drive.downloadFile: downloadFile
+  drive.listChanges: listChanges
+  drive.streamChanges: streamChanges
+  health.health: health
+  status.get: getStatus
+  status.stream: streamStatus
+  session.get: getSession
+  session.signIn: putSession
+  session.signOut: deleteSession
+  link.get: getLink
+  link.link: putLink
+  link.unlink: deleteLink
+  sync.now: syncNow
+  sync.pause: pause
+  sync.resume: resume
+  sync.pending: pending
+  sync.issues: issues
+  sync.dismissIssue: dismissIssue
+  signUpWithEmailAndPassword: signUpEmail
+  signInEmail: signInEmail
+  signOut: signOut

@@ -1,0 +1,4 @@
+.build/
+.swiftpm/
+openapi/generator/.build/
+openapi/generator/.swiftpm/

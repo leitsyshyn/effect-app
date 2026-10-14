@@ -1,0 +1,109 @@
+@startuml class-domain
+!include _style.iuml
+title Class Diagram — Domain Model
+skinparam nodesep 70
+skinparam ranksep 60
+
+class User <<entity>> {
+  id : String
+  name : String
+  email : String
+  createdAt : DateTime
+}
+
+class Session <<entity>> {
+  id : String
+  token : String
+  expiresAt : DateTime
+}
+
+class DriveNode <<entity>> {
+  id : UUID
+  name : String
+  kind : NodeKind
+  size : Integer
+  contentType : String [0..1]
+  contentHash : String [0..1]
+  /fileType : String
+  /preview : PreviewKind
+  revision : Integer
+  createdAt : DateTime
+  createdBy : User
+  updatedAt : DateTime
+  updatedBy : User
+  deletedAt : DateTime [0..1]
+}
+
+enum NodeKind <<enumeration>> {
+  file
+  folder
+}
+
+enum PreviewKind <<enumeration>> {
+  text
+  image
+  pdf
+  none
+}
+
+class FileContent <<object storage>> {
+  key : String
+  bytes : Binary
+}
+
+package "Listing" as Listing {
+  class ListingSort <<value>> {
+    column : SortColumn
+    direction : SortDirection
+  }
+
+  class ListingFilter <<value>> {
+    types : Set<String>
+  }
+
+  class TypeCount <<value>> {
+    type : String
+    count : Integer
+  }
+
+  enum SortColumn <<enumeration>> {
+    name
+    created
+    modified
+    uploadedBy
+    editedBy
+    size
+  }
+
+  enum SortDirection <<enumeration>> {
+    ascending
+    descending
+  }
+}
+
+User "1" -left- "0..*" Session : has >
+User "1" -down- "0..*" DriveNode : owns >
+DriveNode "0..1" *-- "0..*" DriveNode : contains >
+FileContent -[hidden]right- NodeKind
+NodeKind -[hidden]right- PreviewKind
+DriveNode -down-> "0..1" FileContent : content
+
+SortColumn <-up- ListingSort
+SortDirection <-up- ListingSort
+Listing ..> DriveNode : sorts, filters,\ncounts types of
+ListingSort -[hidden]right- ListingFilter
+ListingFilter -[hidden]right- TypeCount
+
+note left of DriveNode
+  Only folders contain nodes;
+  only files have content.
+  Names are unique within a folder
+  (case-insensitive).
+  The server derives contentType,
+  fileType and preview from the name.
+  Replacing content increments the
+  revision and updates updatedAt
+  and updatedBy.
+  Deletion is logical (deletedAt).
+end note
+@enduml

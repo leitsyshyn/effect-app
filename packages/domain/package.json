@@ -1,0 +1,23 @@
+{
+  "name": "@effect-app/domain",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./auth": "./src/auth.ts",
+    "./drive": "./src/drive.ts",
+    "./listing": "./src/listing.ts",
+    "./user": "./src/user.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "test": "bun --bun vitest run"
+  },
+  "dependencies": {
+    "effect": "^4.0.0"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.0",
+    "vitest": "^5"
+  }
+}

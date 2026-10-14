@@ -1,0 +1,75 @@
+@startuml component
+!include _style.iuml
+title Component Diagram — Effect Drive
+skinparam nodesep 45
+skinparam ranksep 60
+skinparam packageStyle folder
+
+package "Desktop Client (SwiftUI)" {
+  [Desktop UI] as DeskUI
+  [Server Client] as DeskServer
+  [Sync Control Client] as DeskSync
+  DeskUI .down.> DeskServer
+  DeskUI .down.> DeskSync
+}
+
+package "Sync Daemon (Bun)" {
+  [Control Handler] as Control
+  [Pairing] as Pairing
+  [Status Reporter] as Status
+  [Sync Engine] as Engine
+  [Local File Monitor] as LocalTree
+  [Remote Mirror] as RemoteTree
+  [Sync State Store] as SyncStore
+  [Server Adapter] as RemoteDrive
+  Control .down.> Pairing
+  Control .down.> Status
+  Pairing .down.> Engine
+  Status .down.> SyncStore
+  Engine .down.> LocalTree
+  Engine .down.> SyncStore
+  Engine .down.> RemoteTree
+  RemoteTree .down.> RemoteDrive
+  Engine .down.> RemoteDrive
+}
+
+package "Web Client (React)" {
+  [Web UI] as WebUI
+  [Query Cache] as WebQueries
+  [Server Client] as WebApi
+  WebUI .down.> WebQueries
+  WebQueries .down.> WebApi
+}
+
+package "API Server (Bun)" {
+  [Router] as Router
+  [Authentication] as Auth
+  [Drive Service] as DriveService
+  [Drive Repository] as DriveRepo
+  [Change Notifier] as Events
+  [Blob Store] as BlobStore
+  Router .down.> Auth
+  Router .down.> DriveService
+  DriveService .down.> DriveRepo
+  DriveService .down.> BlobStore
+  DriveService .down.> Events
+}
+
+() "<U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0>Control API" as ControlApi
+() "<U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0><U+00A0>HTTP API" as HttpApi
+
+component "PostgreSQL" <<database>> as PG
+component "Object Storage" <<external>> as S3
+
+ControlApi -down- Control
+DeskSync .down.> ControlApi
+
+HttpApi -down- Router
+DeskServer .down.> HttpApi
+WebApi .down.> HttpApi
+RemoteDrive .down.> HttpApi
+
+Auth .down.> PG
+DriveRepo .down.> PG
+BlobStore .down.> S3
+@enduml

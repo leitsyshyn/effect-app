@@ -1,0 +1,124 @@
+@startuml class-desktop
+!include _style.iuml
+title Class Diagram — Desktop Client
+skinparam nodesep 40
+skinparam ranksep 55
+skinparam class {
+  BackgroundColor<<view>> #E8F1FF
+  BackgroundColor<<view model>> #FFF1DC
+  BackgroundColor<<service>> #EEF0F4
+}
+
+class RootView <<view>>
+class SignInView <<view>>
+class MainView <<view>>
+class DriveView <<view>>
+class SyncView <<view>>
+
+class AppModel {
+  phase : Phase
+  user : AccountUser [0..1]
+  --
+  restore()
+  signIn(email, password)
+  signUp(name, email, password)
+  signOut()
+}
+
+enum Phase <<enumeration>> {
+  restoring
+  signedOut
+  unavailable
+  signedIn
+}
+
+class DriveViewModel <<view model>> {
+  sort : ListingSort
+  filter : ListingFilter
+  typeOptions : TypeOption [*]
+  columns : ColumnVisibility
+  --
+  reload()
+  upload(urls)
+  download(items, folder)
+  delete(items)
+  move(items, parentId)
+}
+
+class SyncViewModel <<view model>> {
+  status : DaemonStatus [0..1]
+  --
+  link(folder)
+  unlink()
+  syncNow()
+  pause()
+  resume()
+}
+
+class AuthService <<service>> {
+  signIn(email, password) : String
+  signUp(name, email, password) : String
+  signOut(token)
+}
+
+interface TokenStore <<interface>> {
+  load() : String [0..1]
+  save(token)
+  delete()
+}
+
+class KeychainTokenStore
+
+class DriveService <<service>> {
+  listFolder(parentId, sort, filter) : FolderListing
+  upload(fileURL, name, parentId)
+  download(item, destination)
+  delete(item)
+  move(item, parentId)
+  changeCursors() : Stream
+}
+
+class SyncDaemonService <<service>> {
+  statusUpdates() : Stream
+  signIn(serverURL, token)
+  link(localPath)
+  unlink()
+  syncNow()
+  pause()
+  resume()
+}
+
+class DriveItem
+class ColumnVisibility
+class ListingRules
+
+class DaemonStatus {
+  state : SyncState
+  pendingCount : Int
+  issueCount : Int
+}
+
+RootView -up-> AppModel
+RootView .right.> SignInView
+RootView .down.> MainView
+MainView -down-> DriveView
+MainView -down-> SyncView
+DriveView -down-> DriveViewModel
+SyncView -down-> SyncViewModel
+
+AppModel -right-> AuthService
+AppModel -left-> TokenStore
+TokenStore <|.down. KeychainTokenStore
+AuthService -[hidden]down- Phase
+
+AppModel *-- DriveViewModel
+AppModel *-- SyncViewModel
+
+DriveViewModel -down-> DriveService
+DriveViewModel o-down- "0..*" DriveItem
+DriveViewModel -down-> ColumnVisibility
+DriveViewModel .down.> ListingRules
+
+SyncViewModel -down-> SyncDaemonService
+SyncViewModel -down-> DaemonStatus
+@enduml

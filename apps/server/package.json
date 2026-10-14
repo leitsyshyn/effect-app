@@ -1,0 +1,35 @@
+{
+  "name": "@effect-app/server",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./testing": "./src/testing/in-process-server.ts"
+  },
+  "scripts": {
+    "dev": "bun --watch src/main.ts",
+    "start": "bun src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun --bun vitest run",
+    "test:watch": "bun --bun vitest",
+    "build": "bun build src/main.ts --target=bun --packages=external --outdir=dist",
+    "db:generate": "bun --bun drizzle-kit generate",
+    "db:migrate": "bun --bun drizzle-kit migrate",
+    "db:push": "bun --bun drizzle-kit push",
+    "db:studio": "bun --bun drizzle-kit studio"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.7.7",
+    "@effect-app/api": "workspace:*",
+    "@effect-app/domain": "workspace:*",
+    "@effect/platform-bun": "4.0.0",
+    "@effect/sql-pg": "4.0.0",
+    "better-auth": "1.7.7",
+    "drizzle-orm": "1.0.0-rc.5-5935859",
+    "effect": "^4.0.0"
+  },
+  "devDependencies": {
+    "@effect/vitest": "^4.0.0",
+    "drizzle-kit": "1.0.0-rc.5-5935859",
+    "vitest": "^5"
+  }
+}

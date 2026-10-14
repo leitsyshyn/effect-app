@@ -1,0 +1,36 @@
+@startuml sequence-web-upload-sync
+!include _style.iuml
+hide footbox
+title Sequence Diagram — Web Upload Propagated to Desktop
+
+actor User
+participant "Web Client" as Web
+participant "API Server" as Server
+participant "Object Storage" as S3
+participant "PostgreSQL" as PG
+participant "Sync Daemon" as Daemon
+participant "Linked Folder" as Folder
+
+User -> Web : upload file
+Web -> Server : POST /api/drive/files
+activate Server
+Server -> Server : derive content type from name
+Server -> S3 : store content
+S3 --> Server : stored
+Server -> PG : insert file metadata
+Server ->> Daemon : change notification (SSE)
+Server --> Web : 201 Created
+deactivate Server
+Web --> User : file listed
+
+activate Daemon
+Daemon -> Server : GET /api/drive/changes
+Server --> Daemon : changed nodes
+Daemon -> Server : GET /api/drive/files/{id}/content
+Server -> S3 : read content
+S3 --> Server : content
+Server --> Daemon : content
+Daemon -> Folder : write file
+Daemon -> Daemon : record synced state
+deactivate Daemon
+@enduml

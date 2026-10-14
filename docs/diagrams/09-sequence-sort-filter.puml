@@ -1,0 +1,79 @@
+@startuml sequence-sort-filter
+!include _style.iuml
+hide footbox
+title Sequence Diagram — Sort and Filter File List
+
+actor User
+boundary DriveView
+control DriveViewModel
+boundary DriveService
+participant "API Server" as Server
+
+== Load folder ==
+User -> DriveView : open folder
+DriveView -> DriveViewModel : reload()
+activate DriveViewModel
+DriveViewModel -> DriveService : listFolder(parentId, sort, filter)
+activate DriveService
+DriveService -> Server : GET /api/drive/nodes?sort=modified-desc
+activate Server
+Server -> Server : sort, filter, count types
+Server --> DriveService : nodes, types
+deactivate Server
+DriveService --> DriveViewModel : FolderListing
+deactivate DriveService
+DriveViewModel --> DriveView : rows, typeOptions
+deactivate DriveViewModel
+DriveView --> User : file list
+
+== Sort ascending ==
+User -> DriveView : select ascending order
+DriveView -> DriveViewModel : sort = modified ascending
+activate DriveViewModel
+DriveViewModel -> DriveService : listFolder(parentId, sort, filter)
+activate DriveService
+DriveService -> Server : GET /api/drive/nodes?sort=modified-asc
+activate Server
+Server -> Server : sort, filter, count types
+Server --> DriveService : nodes, types
+deactivate Server
+DriveService --> DriveViewModel : FolderListing
+deactivate DriveService
+DriveViewModel --> DriveView : rows
+deactivate DriveViewModel
+DriveView --> User : reordered list
+
+== Filter .kt and .jpg ==
+User -> DriveView : select "Only .kt and .jpg"
+DriveView -> DriveViewModel : filter = {kt, jpg}
+activate DriveViewModel
+DriveViewModel -> DriveService : listFolder(parentId, sort, filter)
+activate DriveService
+DriveService -> Server : GET /api/drive/nodes?sort=modified-asc&filter=jpg,kt
+activate Server
+Server -> Server : sort, filter, count types
+Server --> DriveService : nodes, types
+deactivate Server
+DriveService --> DriveViewModel : FolderListing
+deactivate DriveService
+DriveViewModel --> DriveView : rows, typeOptions
+deactivate DriveViewModel
+DriveView --> User : filtered list
+
+== Show all files ==
+User -> DriveView : select "All files"
+DriveView -> DriveViewModel : filter = {}
+activate DriveViewModel
+DriveViewModel -> DriveService : listFolder(parentId, sort, filter)
+activate DriveService
+DriveService -> Server : GET /api/drive/nodes?sort=modified-asc
+activate Server
+Server -> Server : sort, filter, count types
+Server --> DriveService : nodes, types
+deactivate Server
+DriveService --> DriveViewModel : FolderListing
+deactivate DriveService
+DriveViewModel --> DriveView : rows
+deactivate DriveViewModel
+DriveView --> User : complete list
+@enduml

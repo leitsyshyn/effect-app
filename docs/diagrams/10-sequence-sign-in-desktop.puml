@@ -1,0 +1,49 @@
+@startuml sequence-sign-in-desktop
+!include _style.iuml
+hide footbox
+title Sequence Diagram — Desktop Sign-In
+
+actor User
+boundary SignInView
+control AppModel
+boundary AuthService
+boundary DriveService
+boundary TokenStore
+participant "Sync Daemon" as Daemon
+participant "API Server" as Server
+
+User -> SignInView : enter credentials
+SignInView -> AppModel : signIn(email, password)
+activate AppModel
+AppModel -> AuthService : signIn(email, password)
+AuthService -> Server : POST /api/auth/sign-in/email
+alt credentials valid
+  Server --> AuthService : 200 OK, session token
+  AuthService --> AppModel : session token
+  AppModel -> DriveService : currentUser()
+  DriveService -> Server : GET /api/me
+  Server --> DriveService : user
+  DriveService --> AppModel : user
+  AppModel -> TokenStore : save(token)
+  create control SyncViewModel
+  AppModel --> SyncViewModel : <<create>>
+  AppModel -> SyncViewModel : start()
+  AppModel --> SignInView : signed in
+  SignInView --> User : show drive
+else credentials invalid
+  Server --> AuthService : 401 Unauthorized
+  AuthService --> AppModel : error
+  AppModel --> SignInView : error
+  SignInView --> User : show error
+end
+deactivate AppModel
+
+opt signed in (asynchronous)
+  SyncViewModel -> Daemon : PUT /session (server URL, token)
+  activate Daemon
+  Daemon -> Server : GET /api/me
+  Server --> Daemon : user
+  Daemon --> SyncViewModel : session info
+  deactivate Daemon
+end
+@enduml

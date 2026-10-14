@@ -1,0 +1,41 @@
+{
+  "name": "effect-app",
+  "private": true,
+  "workspaces": [
+    "apps/server",
+    "apps/web",
+    "apps/sync",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --parallel --filter '@effect-app/server' --filter '@effect-app/web' --filter '@effect-app/sync' dev",
+    "dev:server": "bun run --filter '@effect-app/server' dev",
+    "dev:web": "bun run --filter '@effect-app/web' dev",
+    "dev:sync": "bun run --filter '@effect-app/sync' dev",
+    "infra:up": "docker compose up -d --wait postgres rustfs && docker compose run --rm rustfs-init",
+    "infra:down": "docker compose down",
+    "start": "bun run --filter '@effect-app/server' start",
+    "typecheck": "bun run --filter '@effect-app/*' typecheck",
+    "build": "bun run --filter '@effect-app/*' build",
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "bun run --filter '@effect-app/domain' --filter '@effect-app/server' --filter '@effect-app/sync' --filter '@effect-app/web' test",
+    "test:watch": "bun run --filter '@effect-app/server' test:watch",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
+    "prepare": "effect-tsgo patch --typescript --no-oxlint",
+    "db:generate": "bun run --filter '@effect-app/server' db:generate",
+    "db:migrate": "bun run --filter '@effect-app/server' db:migrate",
+    "db:push": "bun run --filter '@effect-app/server' db:push",
+    "db:studio": "bun run --filter '@effect-app/server' db:studio"
+  },
+  "devDependencies": {
+    "@effect/tsgo": "0.48.0",
+    "@types/bun": "^1.4.2",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "bun@1.4.2"
+}

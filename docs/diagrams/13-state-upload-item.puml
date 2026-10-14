@@ -1,0 +1,36 @@
+@startuml state-upload-item
+!include _style.iuml
+title State Machine Diagram — Upload Queue Item
+skinparam nodesep 55
+skinparam ranksep 60
+
+[*] -down-> Pending : add
+
+state Pending {
+  [*] -down-> Queued
+  Queued -down-> Uploading : start
+  Uploading -right-> Conflict : name conflict
+  Conflict -up-> Queued : replace,\nkeep both
+}
+
+state Cancelled
+state Failed
+state Done
+state Skipped
+
+Cancelled -[hidden]right-> Failed
+Failed -[hidden]right-> Done
+Done -[hidden]right-> Skipped
+
+Pending -down-> Cancelled : cancel
+Uploading -down-> Failed : error
+Uploading -down-> Done : success
+Conflict -down-> Skipped : skip
+Failed -up-> Queued : retry
+Cancelled -up-> Queued : restart
+
+Cancelled -down-> [*] : clear
+Failed -down-> [*] : clear
+Done -down-> [*] : clear
+Skipped -down-> [*] : clear
+@enduml

@@ -1,0 +1,41 @@
+@startuml state-sync-status
+!include _style.iuml
+title State Machine Diagram — Synchronization Status
+skinparam nodesep 60
+skinparam ranksep 50
+
+[*] -down-> SignedOut
+SignedOut -down-> Unlinked : sign in\n[no folder linked]
+SignedOut -down-> Linked : sign in\n[folder linked]
+Unlinked -up-> SignedOut : sign out
+Unlinked -down-> Linked : link folder
+Linked -up-> Unlinked : unlink folder
+Linked -up-> SignedOut : sign out,\nsession expired
+
+state Linked {
+  [*] -down-> Running
+  Running -right-> Paused : pause
+  Paused -left-> Running : resume
+
+  state Running {
+    [*] -down-> Operational
+    Operational -down-> Offline : server\nunreachable
+    Offline -up-> Operational : server\nreachable
+    Operational -down-> Blocked : folder\nunavailable
+    Offline -right-> Blocked : folder\nunavailable
+    state FolderBack <<choice>>
+    Blocked -down-> FolderBack : folder\navailable
+    FolderBack -up-> Operational : [server\nreachable]
+    FolderBack -left-> Offline : [server\nunreachable]
+
+    state Operational {
+      [*] -down-> Syncing
+      Syncing -down-> UpToDate : queue empty\n[no issues]
+      UpToDate -up-> Syncing : change\ndetected
+      Syncing -down-> Attention : queue empty\n[unresolved issues]
+      Attention -up-> Syncing : change\ndetected
+      Attention -left-> UpToDate : issues resolved
+    }
+  }
+}
+@enduml

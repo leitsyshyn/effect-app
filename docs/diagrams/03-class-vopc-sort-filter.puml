@@ -1,0 +1,84 @@
+@startuml class-vopc-sort-filter
+!include _style.iuml
+skinparam nodesep 60
+skinparam ranksep 60
+title VOPC — Sort by Modification Date and Filter by File Type
+skinparam class {
+  BackgroundColor<<boundary>> #E8F1FF
+  BackgroundColor<<control>> #FFF1DC
+  BackgroundColor<<entity>> #E7F6E7
+}
+
+class DriveView <<boundary>> {
+  sortSelector
+  typeFilterMenu
+  fileTable
+  statusBar
+}
+
+class DriveViewModel <<control>> {
+  sort : ListingSort
+  filter : ListingFilter
+  nodes : DriveItem [*]
+  typeOptions : TypeOption [*]
+  /rows : DriveItem [*]
+  /summary : String
+  --
+  reload()
+}
+
+class DriveService <<boundary>> {
+  listFolder(parentId, sort, filter) : FolderListing
+}
+
+class FolderListing <<entity>> {
+  path : DriveItem [*]
+  nodes : DriveItem [*]
+  types : TypeOption [*]
+}
+
+class ListingSort <<entity>> {
+  column : SortColumn
+  order : SortOrder
+  /query : String
+}
+
+class ListingFilter <<entity>> {
+  types : Set<String>
+  /query : String
+}
+
+class DriveItem <<entity>> {
+  id : String
+  name : String
+  kind : Kind
+  fileType : String
+  createdAt : Date
+  updatedAt : Date
+  createdBy : String
+  updatedBy : String
+}
+
+class TypeOption <<entity>> {
+  type : String
+  count : Int
+}
+
+DriveView -down-> DriveViewModel
+DriveViewModel -left-> ListingSort : sort
+DriveViewModel -left-> ListingFilter : filter
+ListingSort -[hidden]down- ListingFilter
+DriveViewModel -right-> DriveService
+DriveService .down.> FolderListing : <<create>>
+DriveViewModel o-down- "0..*" DriveItem : nodes
+DriveViewModel o-down- "0..*" TypeOption : typeOptions
+FolderListing *-- "0..*" DriveItem
+FolderListing *-- "0..*" TypeOption
+
+note bottom of FolderListing
+  The server sorts by updatedAt (ties by name),
+  keeps only the chosen types and counts every
+  type in the folder; the client shows the rows
+  in the order received.
+end note
+@enduml

@@ -1,0 +1,25 @@
+{
+  "name": "@effect-app/sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/main.ts",
+    "start": "bun src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun --bun vitest run",
+    "test:watch": "bun --bun vitest",
+    "build": "bun build src/main.ts --target=bun --packages=external --outdir=dist"
+  },
+  "dependencies": {
+    "@effect-app/api": "workspace:*",
+    "@effect-app/domain": "workspace:*",
+    "@effect/platform-bun": "4.0.0",
+    "@effect/sql-sqlite-bun": "4.0.0",
+    "effect": "^4.0.0"
+  },
+  "devDependencies": {
+    "@effect-app/server": "workspace:*",
+    "@effect/vitest": "^4.0.0",
+    "vitest": "^5"
+  }
+}

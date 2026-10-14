@@ -1,0 +1,45 @@
+@startuml deployment
+!include _style.iuml
+title Deployment Diagram — Effect Drive
+left to right direction
+skinparam nodesep 40
+skinparam ranksep 90
+
+node "User Workstation" <<device>> as Workstation {
+  artifact "EffectDrive.app" as DesktopApp
+  node "Bun" <<executionEnvironment>> as SyncRuntime {
+    artifact "sync-daemon" as SyncDaemon
+  }
+  artifact "state.db" <<file>> as StateDb
+  artifact "Linked Folder" <<directory>> as LinkedFolder
+}
+
+node "Client Device" <<device>> as ClientDevice {
+  node "Web Browser" <<executionEnvironment>> as Browser {
+    artifact "Web Application" as WebApp
+  }
+}
+
+node "Application Server" <<device>> as AppServer {
+  node "Bun" <<executionEnvironment>> as ServerRuntime {
+    artifact "api-server" as Server
+  }
+}
+
+node "Database Server" <<device>> as DbServer {
+  node "PostgreSQL" <<executionEnvironment>> as Postgres
+}
+
+node "Storage Service" <<device>> as StorageService {
+  artifact "effect-drive" <<bucket>> as Bucket
+}
+
+DesktopApp ..> SyncDaemon : <<HTTP>>
+SyncDaemon ..> StateDb
+SyncDaemon ..> LinkedFolder
+
+Workstation -- AppServer : <<HTTPS>>
+ClientDevice -- AppServer : <<HTTPS>>
+AppServer -- DbServer : <<TCP>>
+AppServer -- StorageService : <<HTTPS>>
+@enduml

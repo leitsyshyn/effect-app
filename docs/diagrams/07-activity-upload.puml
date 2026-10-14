@@ -1,0 +1,51 @@
+@startuml activity-upload
+!include _style.iuml
+title Activity Diagram — File Upload
+
+|User|
+|API Server|
+|Web Client|
+
+|User|
+start
+:Select file;
+|Web Client|
+repeat
+  :Send upload request;
+  |API Server|
+  if (Session valid?) then ([no])
+    :Reject request;
+    |Web Client|
+    :Redirect to sign-in;
+    stop
+  else ([yes])
+  endif
+  |API Server|
+  if (Name available?) then ([yes])
+    :Derive content type from name;
+    :Store content and compute checksum;
+    if (Storage succeeded?) then ([yes])
+      :Record file metadata;
+      :Notify subscribed clients;
+    else ([no])
+      :Discard content and report failure;
+      stop
+    endif
+  else ([no])
+    :Report name conflict;
+    |Web Client|
+    :Ask user for resolution;
+    if (Resolution?) then ([replace or\nkeep both])
+      :Apply resolution to request;
+    else ([skip])
+      :Skip file;
+      stop
+    endif
+  endif
+|Web Client|
+repeat while (File stored?) is ([no]) not ([yes])
+:Refresh file list;
+|User|
+:View uploaded file;
+stop
+@enduml

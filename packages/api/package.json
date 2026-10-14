@@ -1,0 +1,19 @@
+{
+  "name": "@effect-app/api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": "./src/api.ts",
+    "./auth/middleware": "./src/auth/middleware.ts",
+    "./drive/api": "./src/drive/api.ts",
+    "./user/api": "./src/user/api.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@effect-app/domain": "workspace:*",
+    "effect": "^4.0.0"
+  }
+}

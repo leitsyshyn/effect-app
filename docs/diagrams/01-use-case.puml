@@ -1,0 +1,76 @@
+@startuml use-case
+!include _style.iuml
+title Use Case Diagram — Effect Drive
+left to right direction
+skinparam nodesep 22
+skinparam ranksep 70
+
+actor "User" as user
+actor "Desktop User" as duser
+user <|- duser
+
+rectangle "Effect Drive" {
+  package "Account" {
+    usecase "Sign up" as UC_SignUp
+    usecase "Sign in" as UC_SignIn
+    usecase "Sign out" as UC_SignOut
+  }
+
+  package "File Management" {
+    usecase "Browse folders" as UC_Browse
+    usecase "View file list" as UC_List
+    usecase "Preview file" as UC_Preview
+    usecase "Upload file" as UC_Upload
+    usecase "Download file" as UC_Download
+    usecase "Delete file" as UC_Delete
+    usecase "Organize files" as UC_Organize
+
+    usecase "Configure columns" as UC_Columns
+    usecase "Sort by modification date" as UC_Sort
+    usecase "Filter by file type" as UC_Filter
+    usecase "Upload by drag-and-drop" as UC_DropIn
+    usecase "Resolve name conflict" as UC_NameConflict
+    usecase "Download by drag-and-drop" as UC_DragOut
+  }
+
+  package "Synchronization" {
+    usecase "Link local folder" as UC_Link
+    usecase "Request immediate sync" as UC_SyncNow
+    usecase "Unlink local folder" as UC_Unlink
+    usecase "Pause or resume sync" as UC_Pause
+    usecase "Monitor sync status" as UC_SyncStatus
+    usecase "Synchronize folder" as UC_Sync
+  }
+}
+
+user -- UC_SignUp
+user -- UC_SignIn
+user -- UC_SignOut
+user -- UC_Browse
+user -- UC_List
+user -- UC_Preview
+user -- UC_Upload
+user -- UC_Download
+user -- UC_Delete
+user -- UC_Organize
+
+duser -- UC_Link
+duser -- UC_SyncNow
+duser -- UC_Unlink
+duser -- UC_Pause
+duser -- UC_SyncStatus
+
+UC_List <.. UC_Columns : <<extend>>
+UC_List <.. UC_Sort : <<extend>>
+UC_List <.. UC_Filter : <<extend>>
+UC_Upload <.. UC_DropIn : <<extend>>
+UC_Upload <.. UC_NameConflict : <<extend>>
+UC_Download <.. UC_DragOut : <<extend>>
+UC_Link ..> UC_Sync : <<include>>
+UC_SyncNow ..> UC_Sync : <<include>>
+
+note as N1
+  All use cases except Sign up and Sign in
+  require an authenticated session.
+end note
+@enduml

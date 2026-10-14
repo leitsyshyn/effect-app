@@ -1,0 +1,55 @@
+name: effect-app
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: effect_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d effect_app"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - rustfsdata:/data
+
+  rustfs-init:
+    image: amazon/aws-cli:latest
+    depends_on:
+      rustfs:
+        condition: service_started
+    environment:
+      AWS_ACCESS_KEY_ID: rustfsadmin
+      AWS_SECRET_ACCESS_KEY: rustfsadmin
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        for attempt in $$(seq 1 30); do
+          aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket effect-drive 2>/dev/null && exit 0
+          aws --endpoint-url http://rustfs:9000 s3api create-bucket --bucket effect-drive && exit 0
+          sleep 1
+        done
+        exit 1
+
+volumes:
+  pgdata:
+    name: effect-app-pgdata
+  rustfsdata:
+    name: effect-app-rustfsdata
